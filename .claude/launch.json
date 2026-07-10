@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "admin",
+      "runtimeExecutable": "cmd.exe",
+      "runtimeArgs": ["/c", "cd admin && flutter run --release -d web-server --web-port 5000 --web-hostname 127.0.0.1"],
+      "port": 5000
+    }
+  ]
+}

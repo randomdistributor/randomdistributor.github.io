@@ -1,0 +1,37 @@
+# Secrets / env
+.env
+.env.*
+!.env.example
+**/service-account*.json
+supabase/.temp/
+
+# Node / React admin
+node_modules/
+admin/dist/
+admin/build/
+*.local
+
+# Flutter (any app dir, incl. admin/)
+**/.dart_tool/
+**/build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+apps/**/.dart_tool/
+apps/**/build/
+apps/**/.flutter-plugins*
+apps/**/ios/Pods/
+apps/**/android/.gradle/
+apps/**/android/app/google-services.json
+apps/**/ios/Runner/GoogleService-Info.plist
+*.g.dart
+*.freezed.dart
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml

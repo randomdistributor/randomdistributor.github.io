@@ -34,8 +34,21 @@ Flutter Web build opened in a desktop browser.
       dashboard (see `supabase/functions/README.md`).
       Login model: mobile + PIN, mapped internally to `<mobile>@randomdistributors.app`
       (no SMS provider needed). WhatsApp OTP is a later addition.
+- [x] Admin deployed to GitHub Pages (org site) — **live at https://randomdistributor.github.io/**.
+      Auto-deploys on every push to `main` via `.github/workflows/deploy.yml`.
+      Repo: github.com/randomdistributor/randomdistributor.github.io
 - [ ] Order detail + settlement UI in admin (currently orders are list-only)
 - [ ] Product image upload (Supabase Storage bucket `product-images`)
+
+### Buyer app (Flutter) — core built
+- [x] Scaffold apps/buyer (android + web); builds clean, runs (web verified loading).
+- [x] Login (mobile + PIN → internal email mapping), catalog (buyer_catalog, image grid,
+      brand/category filters, search), product detail (MOQ/carton-aware stepper), cart,
+      checkout (place_order RPC + payment info), orders list, order detail with
+      dispatch view + confirm-receipt, wallet (balance + ledger history).
+- [ ] Try end-to-end once a buyer is provisioned + a product/margin exist.
+- [ ] Build Android APK for real-device testing.
+- [ ] Product images (needs Storage bucket + upload in admin/supplier apps).
 - [ ] `apps/buyer/` Flutter: catalog, product detail (MOQ/carton), cart, checkout, orders,
       receipt confirm, wallet
 - [ ] `apps/supplier/` Flutter: products, add product (image), incoming orders, dispatch,

@@ -27,10 +27,10 @@ class _WalletScreenState extends State<WalletScreen> {
         .maybeSingle();
     final ledger = await supabase
         .from('ledger_entries')
-        .select('type, amount, note, created_at')
+        .select('type, amount, note, created_at, order_id, orders(order_no)')
         .eq('party_type', 'buyer')
         .order('created_at', ascending: false)
-        .limit(100);
+        .limit(200);
     return _WalletData(
       balance: (bal?['balance'] as num?)?.toDouble() ?? 0,
       entries: (ledger as List).cast<Map<String, dynamic>>(),
@@ -41,6 +41,22 @@ class _WalletScreenState extends State<WalletScreen> {
     final d = await _load();
     setState(() => _future = Future.value(d));
   }
+
+  String _label(String type) => switch (type) {
+        'order_charge' => 'Purchase',
+        'payment_in' => 'Payment',
+        'payment_out' => 'Payment out',
+        'settlement' => 'Settlement',
+        'credit' => 'Credit',
+        _ => 'Adjustment',
+      };
+
+  IconData _icon(String type) => switch (type) {
+        'order_charge' => Icons.shopping_bag_outlined,
+        'payment_in' => Icons.south_west,
+        'settlement' => Icons.done_all,
+        _ => Icons.swap_horiz,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +95,7 @@ class _WalletScreenState extends State<WalletScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text('History', style: Theme.of(context).textTheme.titleMedium),
+              Text('Ledger', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 6),
               if (data.entries.isEmpty)
                 const Padding(padding: EdgeInsets.all(12), child: Text('No transactions yet.'))
@@ -88,8 +104,11 @@ class _WalletScreenState extends State<WalletScreen> {
                   Card(
                     child: ListTile(
                       dense: true,
-                      title: Text('${e['type']}'.replaceAll('_', ' ')),
-                      subtitle: e['note'] != null ? Text('${e['note']}') : null,
+                      leading: Icon(_icon(e['type'] as String)),
+                      title: Text(_label(e['type'] as String)),
+                      subtitle: Text(e['orders'] != null
+                          ? 'Order #${e['orders']['order_no']}'
+                          : (e['note'] ?? '').toString()),
                       trailing: Text(
                         money(e['amount']),
                         style: TextStyle(

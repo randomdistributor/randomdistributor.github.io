@@ -32,9 +32,15 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         .select('id, dispatch_no, status, dispatch_date, dispatch_copy_image_url')
         .eq('order_id', _orderId)
         .order('dispatch_no');
+    final payments = await supabase
+        .from('payments')
+        .select('amount, mode, status')
+        .eq('order_id', _orderId)
+        .order('created_at');
     return _OrderData(
       items: (items as List).cast<Map<String, dynamic>>(),
       dispatches: (dispatches as List).cast<Map<String, dynamic>>(),
+      payments: (payments as List).cast<Map<String, dynamic>>(),
     );
   }
 
@@ -121,6 +127,37 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 ),
               ),
               const SizedBox(height: 16),
+              Text('Payment', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 6),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: data.payments.isEmpty
+                      ? const Text('No payment submitted.')
+                      : Column(
+                          children: [
+                            for (final p in data.payments)
+                              Row(
+                                children: [
+                                  Expanded(child: Text('${money(p['amount'])} · ${p['mode']}')),
+                                  Text(
+                                    '${p['status']}',
+                                    style: TextStyle(
+                                      color: p['status'] == 'confirmed'
+                                          ? Colors.green.shade700
+                                          : p['status'] == 'rejected'
+                                              ? Colors.red.shade700
+                                              : Colors.orange.shade800,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
+                ),
+              ),
+              const SizedBox(height: 16),
               Text('Dispatches', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 6),
               if (data.dispatches.isEmpty)
@@ -171,5 +208,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 class _OrderData {
   final List<Map<String, dynamic>> items;
   final List<Map<String, dynamic>> dispatches;
-  _OrderData({required this.items, required this.dispatches});
+  final List<Map<String, dynamic>> payments;
+  _OrderData({required this.items, required this.dispatches, required this.payments});
 }

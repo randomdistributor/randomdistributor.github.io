@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../main.dart';
 import '../theme.dart';
+import 'order_detail_screen.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -52,12 +53,18 @@ class _OrdersScreenState extends State<OrdersScreen> {
               ],
               rows: [
                 for (final r in rows)
-                  DataRow(cells: [
-                    DataCell(Text('#${r['order_no']}')),
-                    DataCell(Text((r['buyers']?['name']) ?? '—')),
-                    DataCell(Text(money(r['total_amount']))),
-                    DataCell(_StatusChip(r['status'] as String)),
-                  ]),
+                  DataRow(
+                    onSelectChanged: (_) => Navigator.of(context)
+                        .push(MaterialPageRoute(
+                            builder: (_) => OrderDetailScreen(order: r)))
+                        .then((_) => setState(() {})),
+                    cells: [
+                      DataCell(Text('#${r['order_no']}')),
+                      DataCell(Text((r['buyers']?['name']) ?? '—')),
+                      DataCell(Text(money(r['total_amount']))),
+                      DataCell(_StatusChip(r['status'] as String)),
+                    ],
+                  ),
               ],
             ),
           ),

@@ -158,7 +158,7 @@ begin
   insert into ledger_entries(party_type, party_id, order_id, type, amount, ref_payment_id, note)
   values (
     new.party_type, new.party_id, new.order_id,
-    case when new.direction = 'in' then 'payment_in' else 'payment_out' end,
+    (case when new.direction = 'in' then 'payment_in' else 'payment_out' end)::ledger_type,
     case when new.direction = 'in' then new.amount else -new.amount end,
     new.id, new.note
   );

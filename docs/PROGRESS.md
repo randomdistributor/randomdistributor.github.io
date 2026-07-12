@@ -37,8 +37,17 @@ Flutter Web build opened in a desktop browser.
 - [x] Admin deployed to GitHub Pages (org site) — **live at https://randomdistributor.github.io/**.
       Auto-deploys on every push to `main` via `.github/workflows/deploy.yml`.
       Repo: github.com/randomdistributor/randomdistributor.github.io
-- [ ] Order detail + settlement UI in admin (currently orders are list-only)
+- [x] Order detail in admin (items with both prices) + confirm/reject the buyer's
+      checkout payment (`0005`, `confirm_payment` RPC)
+- [ ] Settlement UI in admin (settle_order exists; needs a button/screen)
 - [ ] Product image upload (Supabase Storage bucket `product-images`)
+
+### Payment flow (0005) — buyer submits at checkout, admin confirms
+- Buyer checkout captures mode + amount (partial allowed) + optional wallet credit;
+  `place_order` records a **pending** payment linked to the order.
+- Ledger posts only when a payment is **confirmed** (admin). Standalone admin payments
+  (no order_id) default to confirmed and post immediately to the party's wallet.
+- Buyer order detail shows payment status; buyer Wallet is now a full ledger.
 
 ### Buyer app (Flutter) — core built
 - [x] Scaffold apps/buyer (android + web); builds clean, runs (web verified loading).

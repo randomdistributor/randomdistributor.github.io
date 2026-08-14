@@ -1,7 +1,10 @@
-name: Deploy admin to GitHub Pages
+name: Deploy apps to GitHub Pages
 
-# Builds the Flutter Web admin console and publishes it to GitHub Pages
-# on every push to main. Served at the org root: https://randomdistributor.github.io/
+# Builds all three Flutter Web apps and publishes them to GitHub Pages:
+#   admin    -> https://randomdistributor.github.io/
+#   buyer    -> https://randomdistributor.github.io/buyer/
+#   supplier -> https://randomdistributor.github.io/supplier/
+# Runs on every push to main.
 
 on:
   push:
@@ -27,15 +30,34 @@ jobs:
         with:
           channel: stable
 
-      - name: Build web
+      - name: Build admin (root)
         working-directory: admin
         run: |
           flutter pub get
           flutter build web --release --base-href /
 
+      - name: Build buyer (/buyer/)
+        working-directory: apps/buyer
+        run: |
+          flutter pub get
+          flutter build web --release --base-href /buyer/
+
+      - name: Build supplier (/supplier/)
+        working-directory: apps/supplier
+        run: |
+          flutter pub get
+          flutter build web --release --base-href /supplier/
+
+      - name: Assemble site
+        run: |
+          rm -rf public && mkdir -p public
+          cp -r admin/build/web/. public/
+          mkdir -p public/buyer && cp -r apps/buyer/build/web/. public/buyer/
+          mkdir -p public/supplier && cp -r apps/supplier/build/web/. public/supplier/
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: admin/build/web
+          path: public
 
   deploy:
     needs: build

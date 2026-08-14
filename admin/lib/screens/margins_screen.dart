@@ -93,6 +93,77 @@ class _MarginsScreenState extends State<MarginsScreen> {
     }
   }
 
+  /// Edit an existing rule's type/value. Scope and target are fixed — changing
+  /// those would make it a different rule, so add a new one instead.
+  Future<void> _editRule(Map<String, dynamic> rule) async {
+    var type = rule['margin_type'] as String;
+    final value = TextEditingController(text: '${rule['margin_value']}');
+    var active = rule['active'] == true;
+
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => AlertDialog(
+          title: Text('Edit margin — ${_targetNameFor(rule['scope'], rule['scope_ref_id'] as String?)}'),
+          content: SizedBox(
+            width: 340,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<String>(
+                  initialValue: type,
+                  decoration: const InputDecoration(labelText: 'Type'),
+                  items: const [
+                    DropdownMenuItem(value: 'percent', child: Text('Percent %')),
+                    DropdownMenuItem(value: 'flat', child: Text('Flat ₹')),
+                  ],
+                  onChanged: (v) => setLocal(() => type = v!),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: value,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Value'),
+                  onChanged: (_) => setLocal(() {}),
+                ),
+                const SizedBox(height: 8),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Active'),
+                  subtitle: const Text('Inactive rules are ignored when pricing'),
+                  value: active,
+                  onChanged: (v) => setLocal(() => active = v),
+                ),
+                const SizedBox(height: 4),
+                _PreviewLine(type: type, value: double.tryParse(value.text) ?? 0),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save')),
+          ],
+        ),
+      ),
+    );
+
+    if (saved != true) return;
+    final v = double.tryParse(value.text.trim());
+    if (v == null) return;
+    try {
+      await supabase.from('margin_rules').update({
+        'margin_type': type,
+        'margin_value': v,
+        'active': active,
+      }).eq('id', rule['id']);
+      await _loadAll();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      }
+    }
+  }
+
   Future<void> _deleteRule(String id) async {
     await supabase.from('margin_rules').delete().eq('id', id);
     await _loadAll();
@@ -200,14 +271,29 @@ class _MarginsScreenState extends State<MarginsScreen> {
             for (final r in _rules)
               Card(
                 child: ListTile(
+                  onTap: () => _editRule(r),
                   leading: _scopeChip(r['scope']),
                   title: Text(_targetNameFor(r['scope'], r['scope_ref_id'] as String?)),
-                  subtitle: Text(r['margin_type'] == 'percent'
-                      ? '+${r['margin_value']}%'
-                      : '+${money(r['margin_value'])}'),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete_outline),
-                    onPressed: () => _deleteRule(r['id'] as String),
+                  subtitle: Text([
+                    r['margin_type'] == 'percent'
+                        ? '+${r['margin_value']}%'
+                        : '+${money(r['margin_value'])}',
+                    if (r['active'] != true) 'inactive',
+                  ].join('  ·  ')),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        tooltip: 'Edit',
+                        icon: const Icon(Icons.edit_outlined),
+                        onPressed: () => _editRule(r),
+                      ),
+                      IconButton(
+                        tooltip: 'Delete',
+                        icon: const Icon(Icons.delete_outline),
+                        onPressed: () => _deleteRule(r['id'] as String),
+                      ),
+                    ],
                   ),
                 ),
               ),

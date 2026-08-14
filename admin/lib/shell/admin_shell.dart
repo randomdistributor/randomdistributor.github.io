@@ -5,6 +5,7 @@ import '../screens/dashboard_screen.dart';
 import '../screens/suppliers_screen.dart';
 import '../screens/buyers_screen.dart';
 import '../screens/products_screen.dart';
+import '../screens/refdata_screen.dart';
 import '../screens/margins_screen.dart';
 import '../screens/orders_screen.dart';
 import '../screens/payments_screen.dart';
@@ -32,6 +33,7 @@ class _AdminShellState extends State<AdminShell> {
     _Dest('Suppliers', Icons.local_shipping_outlined, SuppliersScreen()),
     _Dest('Buyers', Icons.people_alt_outlined, BuyersScreen()),
     _Dest('Products', Icons.inventory_2_outlined, ProductsScreen()),
+    _Dest('Categories', Icons.sell_outlined, RefDataScreen()),
     _Dest('Margins', Icons.tune, MarginsScreen()),
     _Dest('Orders', Icons.receipt_long_outlined, OrdersScreen()),
     _Dest('Payments', Icons.payments_outlined, PaymentsScreen()),

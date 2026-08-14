@@ -37,6 +37,49 @@ class _ProductsScreenState extends State<ProductsScreen> {
     if (saved == true) _reload();
   }
 
+  /// Delete a product. If it's referenced by past orders the DB blocks the delete
+  /// (on delete restrict) — in that case offer to disable it instead, which hides
+  /// it from the buyer catalog without corrupting order history.
+  Future<void> _delete(Map<String, dynamic> row) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete product?'),
+        content: Text('"${row['product_code']}" and its images will be removed.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+
+    try {
+      await supabase.from('products').delete().eq('id', row['id']);
+      _reload();
+    } catch (e) {
+      if (!mounted) return;
+      final disable = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Cannot delete'),
+          content: const Text(
+              'This product is used in existing orders, so it cannot be deleted. '
+              'Disable it instead? It will be hidden from the buyer catalog and '
+              'order history stays intact.'),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Disable')),
+          ],
+        ),
+      );
+      if (disable == true) {
+        await supabase.from('products').update({'status': 'disabled'}).eq('id', row['id']);
+        _reload();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,9 +126,20 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       DataCell(Text(r['sale_mode'] == 'carton_only'
                           ? '${r['units_per_carton']}/carton · MOQ ${r['moq']}'
                           : 'loose · MOQ ${r['moq']}')),
-                      DataCell(IconButton(
-                        icon: const Icon(Icons.edit_outlined),
-                        onPressed: () => _edit(r),
+                      DataCell(Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            tooltip: 'Edit',
+                            icon: const Icon(Icons.edit_outlined),
+                            onPressed: () => _edit(r),
+                          ),
+                          IconButton(
+                            tooltip: 'Delete',
+                            icon: const Icon(Icons.delete_outline),
+                            onPressed: () => _delete(r),
+                          ),
+                        ],
                       )),
                     ]),
                 ],

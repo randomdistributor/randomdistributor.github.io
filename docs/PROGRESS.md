@@ -60,8 +60,11 @@ Flutter Web build opened in a desktop browser.
 - [ ] Product images (needs Storage bucket + upload in admin/supplier apps).
 - [ ] `apps/buyer/` Flutter: catalog, product detail (MOQ/carton), cart, checkout, orders,
       receipt confirm, wallet
-- [ ] `apps/supplier/` Flutter: products, add product (image), incoming orders, dispatch,
-      account
+- [x] `apps/supplier/` Flutter (android + web): mobile+PIN login, My products with
+      **image upload** (Storage bucket `product-images`), add/edit product (MOQ/carton),
+      incoming "System" orders, supplier order detail, **create dispatch** (short supply +
+      copy/bill upload to `dispatch-docs`), account (balance + ledger). Builds clean.
+      Migration `0006_storage.sql` creates the buckets + policies. Preview port 5002.
 - [ ] FCM push wiring
 - [ ] WhatsApp Business Cloud API integration (Edge Function)
 

@@ -12,6 +12,12 @@
       "runtimeExecutable": "cmd.exe",
       "runtimeArgs": ["/c", "cd apps/buyer && flutter run --release -d web-server --web-port 5001 --web-hostname 127.0.0.1"],
       "port": 5001
+    },
+    {
+      "name": "supplier",
+      "runtimeExecutable": "cmd.exe",
+      "runtimeArgs": ["/c", "cd apps/supplier && flutter run --release -d web-server --web-port 5002 --web-hostname 127.0.0.1"],
+      "port": 5002
     }
   ]
 }

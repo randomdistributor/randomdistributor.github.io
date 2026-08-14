@@ -34,9 +34,12 @@ Flutter Web build opened in a desktop browser.
       dashboard (see `supabase/functions/README.md`).
       Login model: mobile + PIN, mapped internally to `<mobile>@randomdistributors.app`
       (no SMS provider needed). WhatsApp OTP is a later addition.
-- [x] Admin deployed to GitHub Pages (org site) — **live at https://randomdistributor.github.io/**.
-      Auto-deploys on every push to `main` via `.github/workflows/deploy.yml`.
-      Repo: github.com/randomdistributor/randomdistributor.github.io
+- [x] All three apps deployed to GitHub Pages, auto-deploy on every push to `main`
+      (`.github/workflows/deploy.yml`). Repo: github.com/randomdistributor/randomdistributor.github.io
+      - Admin:    https://randomdistributor.github.io/
+      - Buyer:    https://randomdistributor.github.io/buyer/
+      - Supplier: https://randomdistributor.github.io/supplier/
+- [x] Daily Supabase keep-alive workflow (`keepalive.yml`) to avoid free-tier pausing.
 - [x] Order detail in admin (items with both prices) + confirm/reject the buyer's
       checkout payment (`0005`, `confirm_payment` RPC)
 - [ ] Settlement UI in admin (settle_order exists; needs a button/screen)

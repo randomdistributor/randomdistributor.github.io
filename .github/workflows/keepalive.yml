@@ -1,0 +1,30 @@
+name: Supabase keep-alive
+
+# Free Supabase projects pause after ~7 days of inactivity. This pings the REST
+# API once a day so the project never goes idle long enough to be paused.
+# The anon key is public (RLS protects the data), so it's safe to keep here.
+
+on:
+  schedule:
+    - cron: '23 6 * * *'   # every day at 06:23 UTC
+  workflow_dispatch:        # lets you run it manually from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Random Distributors project
+        run: |
+          code=$(curl -sS -o /dev/null -w "%{http_code}" \
+            "https://jeyygyomrqhiresojdty.supabase.co/rest/v1/organization?select=id&limit=1" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpleXlneW9tcnFoaXJlc29qZHR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2NzQ2MTMsImV4cCI6MjA5OTI1MDYxM30.FqWx_M0swUQxLYCQ2zJpPkSOkYvgHpa3GtwZUrZi6y0")
+          echo "Random Distributors HTTP $code"
+          # 200 (or even 401/empty) means the request reached the DB and reset the timer.
+
+      # To also keep your SECOND project alive, duplicate the step below with that
+      # project's URL and anon key:
+      # - name: Ping second project
+      #   run: |
+      #     curl -sS -o /dev/null -w "%{http_code}\n" \
+      #       "https://<other-ref>.supabase.co/rest/v1/<some_table>?select=id&limit=1" \
+      #       -H "apikey: <other-anon-key>" -H "Authorization: Bearer <other-anon-key>"

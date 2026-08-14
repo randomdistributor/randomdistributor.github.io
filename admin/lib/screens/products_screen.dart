@@ -147,6 +147,47 @@ class _ProductDialogState extends State<_ProductDialog> {
     setState(() => _loading = false);
   }
 
+  /// Create a category/brand inline so the admin isn't blocked by missing ref data.
+  Future<void> _createRef({required bool isCategory}) async {
+    final controller = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(isCategory ? 'New category' : 'New brand'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: InputDecoration(labelText: isCategory ? 'Category name' : 'Brand name'),
+          onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+    if (name == null || name.isEmpty) return;
+
+    final table = isCategory ? 'categories' : 'brands';
+    try {
+      final row = await supabase.from(table).insert({'name': name}).select('id, name').single();
+      setState(() {
+        if (isCategory) {
+          _categories = [..._categories, row];
+          _categoryId = row['id'] as String;
+        } else {
+          _brands = [..._brands, row];
+          _brandId = row['id'] as String;
+        }
+      });
+    } catch (e) {
+      if (mounted) setState(() => _error = 'Could not add: $e');
+    }
+  }
+
   Future<void> _save() async {
     final price = double.tryParse(_price.text.trim());
     if (_code.text.trim().isEmpty || _supplierId == null || price == null) {
@@ -224,7 +265,12 @@ class _ProductDialogState extends State<_ProductDialog> {
                           onChanged: (v) => setState(() => _categoryId = v),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      IconButton(
+                        tooltip: 'New category',
+                        icon: const Icon(Icons.add_circle_outline),
+                        onPressed: () => _createRef(isCategory: true),
+                      ),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           initialValue: _brandId,
@@ -236,6 +282,11 @@ class _ProductDialogState extends State<_ProductDialog> {
                           ],
                           onChanged: (v) => setState(() => _brandId = v),
                         ),
+                      ),
+                      IconButton(
+                        tooltip: 'New brand',
+                        icon: const Icon(Icons.add_circle_outline),
+                        onPressed: () => _createRef(isCategory: false),
                       ),
                     ]),
                     const SizedBox(height: 12),

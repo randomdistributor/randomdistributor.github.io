@@ -66,6 +66,59 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     setState(() => _loading = false);
   }
 
+  /// Lets the supplier create a category/brand that doesn't exist yet.
+  Future<void> _createRef({required bool isCategory}) async {
+    final controller = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(isCategory ? 'New category' : 'New brand'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: InputDecoration(labelText: isCategory ? 'Category name' : 'Brand name'),
+          onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+    if (name == null || name.isEmpty) return;
+
+    final table = isCategory ? 'categories' : 'brands';
+    try {
+      final row = await supabase.from(table).insert({'name': name}).select('id, name').single();
+      setState(() {
+        if (isCategory) {
+          _categories = [..._categories, row]..sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
+          _categoryId = row['id'] as String;
+        } else {
+          _brands = [..._brands, row]..sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
+          _brandId = row['id'] as String;
+        }
+      });
+    } catch (e) {
+      // Most likely a duplicate name — reuse the existing row instead.
+      final existing = await supabase.from(table).select('id, name').ilike('name', name).maybeSingle();
+      if (existing != null) {
+        setState(() {
+          if (isCategory) {
+            _categoryId = existing['id'] as String;
+          } else {
+            _brandId = existing['id'] as String;
+          }
+        });
+      } else if (mounted) {
+        setState(() => _error = 'Could not add ${isCategory ? 'category' : 'brand'}: $e');
+      }
+    }
+  }
+
   Future<void> _addImage(ImageSource source) async {
     setState(() => _uploading = true);
     try {
@@ -200,7 +253,14 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       onChanged: (v) => setState(() => _categoryId = v),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  IconButton(
+                    tooltip: 'New category',
+                    icon: const Icon(Icons.add_circle_outline),
+                    onPressed: () => _createRef(isCategory: true),
+                  ),
+                ]),
+                const SizedBox(height: 12),
+                Row(children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       initialValue: _brandId,
@@ -212,6 +272,11 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       ],
                       onChanged: (v) => setState(() => _brandId = v),
                     ),
+                  ),
+                  IconButton(
+                    tooltip: 'New brand',
+                    icon: const Icon(Icons.add_circle_outline),
+                    onPressed: () => _createRef(isCategory: false),
                   ),
                 ]),
                 const SizedBox(height: 12),

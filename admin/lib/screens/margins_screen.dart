@@ -84,7 +84,7 @@ class _MarginsScreenState extends State<MarginsScreen> {
         'margin_type': _type,
         'margin_value': v,
         'active': true,
-      }, onConflict: 'scope, scope_ref_id');
+      }, onConflict: 'scope,scope_ref_id');
       await _loadAll();
     } catch (e) {
       if (mounted) {

@@ -1,4 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import '../widgets/product_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -350,9 +350,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
             child: SizedBox(
               width: 88,
               height: 88,
-              child: url == null
-                  ? Container(color: const Color(0xFFEDEFF3))
-                  : CachedNetworkImage(imageUrl: url, fit: BoxFit.cover),
+              child: ProductImage(url: url),
             ),
           ),
           Positioned(

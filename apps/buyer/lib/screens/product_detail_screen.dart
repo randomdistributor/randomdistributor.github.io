@@ -1,4 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import '../widgets/product_image.dart';
 import 'package:flutter/material.dart';
 
 import '../cart.dart';
@@ -75,12 +75,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         children: [
           AspectRatio(
             aspectRatio: 1,
-            child: img == null || img.isEmpty
-                ? Container(
-                    color: const Color(0xFFEDEFF3),
-                    child: const Icon(Icons.image_outlined, size: 64, color: Colors.black26),
-                  )
-                : CachedNetworkImage(imageUrl: img, fit: BoxFit.cover),
+            child: ProductImage(url: img),
           ),
           Padding(
             padding: const EdgeInsets.all(16),

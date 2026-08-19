@@ -1,4 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import '../widgets/product_image.dart';
 import 'package:flutter/material.dart';
 
 import '../main.dart';
@@ -123,11 +123,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       child: SizedBox(
                         width: 52,
                         height: 52,
-                        child: img == null || img.isEmpty
-                            ? Container(
-                                color: const Color(0xFFEDEFF3),
-                                child: const Icon(Icons.image_outlined, color: Colors.black26))
-                            : CachedNetworkImage(imageUrl: img, fit: BoxFit.cover),
+                        child: ProductImage(url: img),
                       ),
                     ),
                     title: Text(p['description'] ?? p['product_code'] ?? '',

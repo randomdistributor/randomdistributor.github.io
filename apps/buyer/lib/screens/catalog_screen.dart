@@ -1,9 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../main.dart';
 import '../theme.dart';
 import 'product_detail_screen.dart';
+import '../widgets/product_image.dart';
 
 class CatalogScreen extends StatefulWidget {
   const CatalogScreen({super.key});
@@ -144,20 +144,7 @@ class _ProductCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: img == null || img.isEmpty
-                  ? Container(
-                      color: const Color(0xFFEDEFF3),
-                      child: const Icon(Icons.image_outlined, size: 40, color: Colors.black26),
-                    )
-                  : CachedNetworkImage(
-                      imageUrl: img,
-                      fit: BoxFit.cover,
-                      placeholder: (_, _) => Container(color: const Color(0xFFEDEFF3)),
-                      errorWidget: (_, _, _) => Container(
-                        color: const Color(0xFFEDEFF3),
-                        child: const Icon(Icons.broken_image_outlined, color: Colors.black26),
-                      ),
-                    ),
+              child: ProductImage(url: img),
             ),
             Padding(
               padding: const EdgeInsets.all(8),

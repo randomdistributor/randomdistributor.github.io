@@ -22,7 +22,7 @@ class _BuyersScreenState extends State<BuyersScreen> {
   void _reload() {
     _future = supabase
         .from('buyers')
-        .select('id, profile_id, name, business_name, address, status')
+        .select('id, profile_id, name, business_name, address, status, notify_new_products')
         .order('name')
         .then((v) => (v as List).cast<Map<String, dynamic>>());
     setState(() {});

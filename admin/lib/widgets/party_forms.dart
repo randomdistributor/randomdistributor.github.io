@@ -177,6 +177,7 @@ class _PartyEditDialogState extends State<_PartyEditDialog> {
   late final _business = TextEditingController(text: widget.row['business_name']);
   late final _gst = TextEditingController(text: widget.row['gst_no']);
   late final _address = TextEditingController(text: widget.row['address']);
+  late bool _notify = widget.row['notify_new_products'] != false;
   bool _busy = false;
   String? _error;
 
@@ -196,6 +197,7 @@ class _PartyEditDialogState extends State<_PartyEditDialog> {
       'address': _address.text.trim().isEmpty ? null : _address.text.trim(),
       if (_isSupplier(widget.role))
         'gst_no': _gst.text.trim().isEmpty ? null : _gst.text.trim(),
+      if (!_isSupplier(widget.role)) 'notify_new_products': _notify,
     };
     try {
       await supabase.from(table).update(payload).eq('id', widget.row['id']);
@@ -226,6 +228,14 @@ class _PartyEditDialogState extends State<_PartyEditDialog> {
             ],
             const SizedBox(height: 12),
             TextField(controller: _address, decoration: const InputDecoration(labelText: 'Address'), maxLines: 2),
+            if (!_isSupplier(widget.role))
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Notify about new products'),
+                subtitle: const Text('Include this buyer in new-product broadcasts'),
+                value: _notify,
+                onChanged: (v) => setState(() => _notify = v),
+              ),
             if (_error != null) ...[
               const SizedBox(height: 12),
               Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),

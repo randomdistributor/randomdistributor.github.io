@@ -80,3 +80,17 @@ Flutter Web build opened in a desktop browser.
 ## Notes / decisions
 - RLS is the load-bearing security control. Any new table that holds supplier- or
   buyer-identifying data MUST get an explicit policy before it ships.
+
+### Notifications — Phase 1 (in-app) done
+- `0008_new_product_notifications.sql`: `buyers.notify_new_products` opt-out flag,
+  `notifications.read_at`, and a SECURITY DEFINER trigger that queues one
+  notification per opted-in active buyer when a product is added. Buyers can mark
+  their own notifications read (new RLS update policy).
+- Buyer app: bell icon with unread badge → "New products" feed (image, live price,
+  time), tap opens the product. Opening the feed clears the badge.
+- Admin: buyer edit has a "Notify about new products" toggle.
+- Design note: the trigger only *queues*; senders drain the queue. Phase 2 (FCM push,
+  needs Firebase + APKs) and Phase 3 (WhatsApp digest, paid + template approval)
+  plug into the same table without schema changes.
+- Payload stores only the product reference so images uploaded after the insert
+  still appear (feed reads live data from `buyer_catalog`).
